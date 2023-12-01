@@ -18,6 +18,7 @@ const request = require("request"),
     body_parser = require("body-parser"),
     axios = require("axios").default,
     app = express().use(body_parser.json()); // creates express http server
+const whatsapp = require("./whatsapp");
 
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
@@ -45,20 +46,7 @@ app.post("/webhook", (req, res) => {
             let phone_number_id = entry.metadata.phone_number_id;
             let from = entry.messages[0].from; // extract the phone number from the webhook payload
             let msg_body = entry.messages[0].text.body; // extract the message text from the webhook payload
-            axios({
-                method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-                url:
-                    "https://graph.facebook.com/v12.0/" +
-                    phone_number_id +
-                    "/messages?access_token=" +
-                    token,
-                data: {
-                    messaging_product: "whatsapp",
-                    to: from,
-                    text: {body: "Ack2: " + msg_body},
-                },
-                headers: {"Content-Type": "application/json"},
-            }).then(r =>{});
+            whatsapp.sendText({messageBody:msg_body,phoneNumber:phone_number_id,chatBotNum:from});
          }
         res.sendStatus(200);
     } else {
